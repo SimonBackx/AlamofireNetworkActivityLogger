@@ -46,6 +46,9 @@ public enum NetworkActivityLoggerLevel {
     
     /// Equivalent to `.off`
     case fatal
+    
+    /// Alias for debug, but only for non 200 - 299 statuscodes
+    case debugErrors
 }
 
 /// `NetworkActivityLogger` logs requests and responses made by Alamofire.SessionManager, with an adjustable level of detail.
@@ -133,7 +136,7 @@ public class NetworkActivityLogger {
             if let httpBody = request.httpBody, let httpBodyString = String(data: httpBody, encoding: .utf8) {
                 print(httpBodyString)
             }
-        case .info:
+        case .info, .debugErrors:
             logDivider()
             
             print("\(httpMethod) '\(requestURL.absoluteString)'")
@@ -166,7 +169,7 @@ public class NetworkActivityLogger {
         
         if let error = task.error {
             switch level {
-            case .debug, .info, .warn, .error:
+            case .debug, .info, .warn, .error, .debugErrors:
                 logDivider()
                 
                 print("[Error] \(httpMethod) '\(requestURL.absoluteString)' [\(String(format: "%.04f", elapsedTime)) s]:")
@@ -180,6 +183,15 @@ public class NetworkActivityLogger {
             }
             
             switch level {
+            case .debugErrors:
+                if response.statusCode >= 200 || response.statusCode < 300 {
+                    logDivider()
+                    
+                    print("\(String(response.statusCode)) '\(requestURL.absoluteString)' [\(String(format: "%.04f", elapsedTime)) s]:")
+                } else {
+                    fallthrough
+                }
+                
             case .debug:
                 logDivider()
                 
