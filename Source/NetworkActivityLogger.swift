@@ -184,7 +184,7 @@ public class NetworkActivityLogger {
             
             switch level {
             case .debugErrors:
-                if response.statusCode >= 200 || response.statusCode < 300 {
+                if response.statusCode >= 200 && response.statusCode < 300 {
                     logDivider()
                     
                     print("\(String(response.statusCode)) '\(requestURL.absoluteString)' [\(String(format: "%.04f", elapsedTime)) s]:")
